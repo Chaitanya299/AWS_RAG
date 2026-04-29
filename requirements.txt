@@ -8,8 +8,6 @@ langchain-huggingface
 sentence-transformers
 chromadb
 rank_bm25
-sentence-transformers
-redis
 prometheus-client
 pytest
 pytest-asyncio

@@ -1,52 +1,61 @@
-# RAG Pipeline Architecture
+# RAG Pipeline Architecture — AWS Assistant
 
-This document describes the data flow and component interactions in the AWS Assistant RAG API.
+This document describes the data flow and component interactions in the established AWS Assistant RAG system.
 
-## High-Level Flow
+## High-Level Flow (Production)
 
 ```
-User Query
+User Query 
     │
     ▼
-[ PromptInjectionGuard ] ───▶ (Blocks if malicious)
+[ PromptInjectionGuard ] ───▶ (Blocks if malicious instructions detected)
     │
     ▼
-[ DomainGuard ] ────────────▶ (Blocks if out-of-scope)
+[ DomainGuard ] ────────────▶ (Graceful helpful boundary if out-of-scope)
     │
     ▼
-[ Redis Cache ] ────────────▶ (Returns cached RAGResponse if hit)
+[ Hybrid Retriever ] ───────▶ (Parallel Execution)
+    ├── ChromaDB (Dense Vector Search: all-MiniLM-L6-v2)
+    └── BM25 (Sparse Keyword Search)
     │
     ▼
-[ Hybrid Retriever ]
-    ├── ChromaDB (Dense Vector Search)
-    └── BM25 (Keyword Search)
+[ RRF Fusion ] ─────────────▶ (Reciprocal Rank Fusion + Min-Max Normalization)
     │
     ▼
-[ Context Assembler ] ──────▶ (Wraps context in XML tags)
+[ Context Assembler ] ──────▶ (Structured XML-tagged Context)
     │
     ▼
-[ Response Generator ] ─────▶ (Claude 3.5 Sonnet)
+[ Response Generator ] ─────▶ (GPT-4o with GPT-4o-mini Fallback)
     │
     ▼
-[ ResponseGuard ] ──────────▶ (Hallucination check)
+[ G-Eval Validator ] ───────▶ (LLM-as-a-judge: Faithfulness scoring)
     │
     ▼
-[ Final Answer ] ───────────▶ (Return to User)
+[ Bento Dashboard ] ────────▶ (Streaming tokens + Thinking Stepper)
 ```
 
 ## Component Responsibilities
 
 ### Domain Layer
 - **Models**: Defines `Chunk`, `Document`, `Query`, and `RAGResponse`.
-- **Exceptions**: Specialized error types for security and domain violations.
+- **Exceptions**: Specialized error types (DomainBoundary, Safety, Hallucination).
+- **Normalized Scoring**: Logic for 0-100% match confidence calculation.
 
 ### Application Layer
-- **RAGService**: Orchestrates the pipeline stages.
-- **Ingestion**: Handles PDF loading, chunking, and vector store population.
+- **RAGService**: Orchestrates parallel retrieval, domain verification, and multi-model generation logic.
+- **Thinking Streams**: Yields real-time status events (`type: step`) for UI feedback.
+- **Ingestion**: Recursive character splitting with context overlap for PDF processing.
 
 ### Infrastructure Layer
-- **VectorStore**: Manages ChromaDB persistence and hybrid search logic.
-- **API**: FastAPI routes and request/response validation.
+- **VectorStore**: Manages local ChromaDB persistence and BM25 hybrid search logic.
+- **API**: FastAPI asynchronous endpoints with X-API-KEY security and Rate Limiting.
+- **Vite Proxy**: Production-aligned local development routing.
 
 ### Shared Layer
-- **Guardrails**: Implementation of safety logic and boundary enforcement.
+- **Guardrails**: Implementation of Prompt Injection filters and helpful Domain-aware responses.
+- **Evaluator**: G-Eval framework for measuring faithfulness and accuracy metrics.
+
+## UI/UX Architecture
+- **Layout**: 12-column Bento Grid for analytical workspace balancing.
+- **Citations**: Interactive HoverCards with source peeking and scroll-to-source synchronization.
+- **Telemetry**: Real-time Latency (needle gauge) and System Health pulse monitoring.

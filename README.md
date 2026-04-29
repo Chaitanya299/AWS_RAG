@@ -184,5 +184,4 @@ python scripts/eval_rag.py
 - **Context Window**: Large document retrievals can occasionally hit token limits, managed currently via RecursiveCharacterTextSplitter.
 
 ---
-🤖 *Generated with [Antigravity](https://github.com/ruvnet/claude-flow)*
-Co-Authored-By: claude-flow <ruv@ruv.net>
+*by~Chaitanya ♥️*

@@ -1,6 +1,5 @@
 import time
 import json
-import redis
 import asyncio
 from typing import List, Optional, Any, AsyncGenerator
 from openai import AsyncOpenAI
@@ -17,14 +16,6 @@ class RAGService:
         self.vector_store = VectorStoreRepository()
         self.openai = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
-        # Redis setup for caching
-        try:
-            self.cache = redis.from_url(settings.REDIS_URL, decode_responses=True)
-            self.cache.ping()
-        except Exception:
-            print("⚠️ Warning: Redis cache unavailable. Proceeding without caching.")
-            self.cache = None
-
         self.prompt_guard = PromptInjectionGuard()
         self.domain_guard = DomainGuard(
             allowed_domain=settings.DOMAIN_NAME,
@@ -38,15 +29,6 @@ class RAGService:
         Executes the full RAG pipeline with parallel orchestration.
         """
         start_time = time.perf_counter()
-
-        # 0. Cache Check
-        if self.cache:
-            cached_res = self.cache.get(f"rag_cache:{query_text.strip().lower()}")
-            if cached_res:
-                print("💡 Cache hit! Returning result from Redis.")
-                data = json.loads(cached_res)
-                data["latency_ms"] = (time.perf_counter() - start_time) * 1000
-                return RAGResponse(**data)
 
         # 1. Input Validation (Synchronous regex check)
         self.prompt_guard.validate(query_text)
@@ -85,14 +67,6 @@ class RAGService:
             source_chunks=source_chunks,
             latency_ms=latency
         )
-
-        # 5. Update Cache
-        if self.cache:
-            self.cache.setex(
-                f"rag_cache:{query_text.strip().lower()}",
-                3600,
-                response.model_dump_json()
-            )
 
         return response
 

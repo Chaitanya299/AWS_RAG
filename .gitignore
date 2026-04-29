@@ -28,9 +28,9 @@ venv/
 ENV/
 
 # Databases & Data
-data/
-*.db
-*.sqlite
+# data/ is whitelisted for Vercel deployment of pre-computed embeddings
+# *.db
+# *.sqlite
 
 # IDEs
 .vscode/
@@ -51,4 +51,4 @@ timeline.jsonl
 learnings.jsonl
 *.output
 *.log
-*.pdf
+# aws-overview.pdf is whitelisted for reference

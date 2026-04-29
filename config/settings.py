@@ -20,7 +20,6 @@ class Settings(BaseSettings):
     # These will be picked up from .env
     OPENAI_API_KEY: str
     API_KEY: str = "dev-secret-key"  # Default for development
-    REDIS_URL: str = "redis://localhost:6379/0"
     CHROMA_DB_PATH: str = "./data/chromadb"
 
     # Model configuration
