@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Activity, Cloud, Wifi, WifiOff } from "lucide-react";
-import { fetchHealth } from "@/lib/api-client.ts";
-import { useSettings } from "@/lib/settings-store.ts";
-import { Card } from "@/components/ui/card";
+import { fetchHealth } from "../../lib/api-client.ts";
+import { useSettings } from "../../lib/settings-store.ts";
+import { Card } from "../ui/card";
 
 interface HealthIndicatorProps {
   recentLatency: number | null;

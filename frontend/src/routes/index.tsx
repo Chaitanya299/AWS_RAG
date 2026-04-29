@@ -2,16 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cloud, FileText, Activity, KeyRound } from "lucide-react";
-import { ChatPanel } from "@/components/dashboard/ChatPanel.tsx";
-import { SourcesSidebar } from "@/components/dashboard/SourcesSidebar.tsx";
-import { SidebarHeader } from "@/components/dashboard/SidebarHeader.tsx";
-import { SettingsPanel } from "@/components/dashboard/SettingsPanel.tsx";
-import { ExportMenu } from "@/components/dashboard/ExportMenu.tsx";
-import { HealthIndicator, LatencyGauge } from "@/components/dashboard/MetricsPanel.tsx";
-import { SessionLogs } from "@/components/dashboard/SessionLogs.tsx";
-import { ScrollArea } from "@/components/ui/scroll-area.tsx";
-import { useSettings } from "@/lib/settings-store.ts";
-import type { ChatMessage } from "@/lib/types.ts";
+import { ChatPanel } from "../components/dashboard/ChatPanel.tsx";
+import { SourcesSidebar } from "../components/dashboard/SourcesSidebar.tsx";
+import { SidebarHeader } from "../components/dashboard/SidebarHeader.tsx";
+import { SettingsPanel } from "../components/dashboard/SettingsPanel.tsx";
+import { ExportMenu } from "../components/dashboard/ExportMenu.tsx";
+import { HealthIndicator, LatencyGauge } from "../components/dashboard/MetricsPanel.tsx";
+import { SessionLogs } from "../components/dashboard/SessionLogs.tsx";
+import { ScrollArea } from "../components/ui/scroll-area.tsx";
+import { useSettings } from "../lib/settings-store.ts";
+import type { ChatMessage } from "../lib/types.ts";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,

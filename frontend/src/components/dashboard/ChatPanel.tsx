@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Square, Sparkles, Zap, AlertCircle, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useSettings } from "@/lib/settings-store.ts";
-import { postQuery, streamQuery } from "@/lib/api-client.ts";
-import { useSessionLogs } from "@/lib/session-logs.ts";
-import type { ChatMessage, SourceChunk } from "@/lib/types.ts";
+import { useSettings } from "../../lib/settings-store.ts";
+import { postQuery, streamQuery } from "../../lib/api-client.ts";
+import { useSessionLogs } from "../../lib/session-logs.ts";
+import type { ChatMessage, SourceChunk } from "../../lib/types.ts";
 import { ChatBubble } from "./ChatBubble.tsx";
 import { ThinkingBubble } from "./ThinkingStepper.tsx";
 
