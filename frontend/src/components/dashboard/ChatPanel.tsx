@@ -4,12 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Square, Sparkles, Zap, AlertCircle, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useSettings } from "@/lib/settings-store";
-import { postQuery, streamQuery } from "@/lib/api-client";
-import { useSessionLogs } from "@/lib/session-logs";
-import type { ChatMessage, SourceChunk } from "@/lib/types";
-import { ChatBubble } from "./ChatBubble";
-import { ThinkingBubble } from "./ThinkingStepper";
+import { useSettings } from "@/lib/settings-store.ts";
+import { postQuery, streamQuery } from "@/lib/api-client.ts";
+import { useSessionLogs } from "@/lib/session-logs.ts";
+import type { ChatMessage, SourceChunk } from "@/lib/types.ts";
+import { ChatBubble } from "./ChatBubble.tsx";
+import { ThinkingBubble } from "./ThinkingStepper.tsx";
 
 const SUGGESTIONS = [
   "What are the AWS best practices for protecting against DDoS attacks?",

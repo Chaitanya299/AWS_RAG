@@ -1,5 +1,5 @@
 import { Clock, FileText, MessageSquare, Trash2 } from "lucide-react";
-import { useSessionLogs } from "@/lib/session-logs";
+import { useSessionLogs } from "@/lib/session-logs.ts";
 import { Button } from "@/components/ui/button";
 import {
   Table,

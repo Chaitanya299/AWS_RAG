@@ -1,3 +1,4 @@
+<!-- /autoplan restore point: /Users/parasana/.gstack/projects/domain_specific_RAG/main-repair-restore-20260430-012241.md -->
 # AWS Assistant — High-Performance Enterprise RAG
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)

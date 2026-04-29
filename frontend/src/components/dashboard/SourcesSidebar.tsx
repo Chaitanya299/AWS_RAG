@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, ChevronDown, ChevronUp, Hash, Copy, Info } from "lucide-react";
 import { useState } from "react";
-import type { SourceChunk } from "@/lib/types";
+import type { SourceChunk } from "@/lib/types.ts";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 

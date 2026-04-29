@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { User, Sparkles, Clock, FileText, Hash } from "lucide-react";
-import type { ChatMessage } from "@/lib/types";
-import { Markdown } from "./Markdown";
+import type { ChatMessage } from "@/lib/types.ts";
+import { Markdown } from "./Markdown.tsx";
 import {
   HoverCard,
   HoverCardContent,
