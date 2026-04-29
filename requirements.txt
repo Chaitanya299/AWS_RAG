@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+langchain
+langchain-openai
+chromadb
+rank_bm25
+sentence-transformers
+redis
+prometheus-client
+pytest
+pytest-asyncio
+httpx
+python-dotenv
+pypdf
