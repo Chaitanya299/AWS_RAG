@@ -10,7 +10,7 @@ import { ExportMenu } from "@/components/dashboard/ExportMenu";
 import { HealthIndicator, LatencyGauge } from "@/components/dashboard/MetricsPanel";
 import { SessionLogs } from "@/components/dashboard/SessionLogs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSettings } from "@/lib/settings-store";
+import { useSettings } from "@/lib/settings-store.ts";
 import type { ChatMessage } from "@/lib/types";
 
 export const Route = createFileRoute("/")({
