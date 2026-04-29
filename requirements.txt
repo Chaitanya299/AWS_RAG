@@ -4,6 +4,8 @@ pydantic
 pydantic-settings
 langchain
 langchain-openai
+langchain-huggingface
+sentence-transformers
 chromadb
 rank_bm25
 sentence-transformers
@@ -14,3 +16,4 @@ pytest-asyncio
 httpx
 python-dotenv
 pypdf
+slowapi

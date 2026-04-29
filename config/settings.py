@@ -7,15 +7,19 @@ from dotenv import load_dotenv
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV_PATH = os.path.join(BASE_DIR, ".env")
 
-# Explicitly load dotenv to handle cases where pydantic-settings might skip it
+# Explicitly load dotenv
 if os.path.exists(ENV_PATH):
     load_dotenv(ENV_PATH, override=True)
+
+# Suppress HuggingFace tokenizers parallelism warning
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 class Settings(BaseSettings):
     """Application settings and environment variables."""
 
     # These will be picked up from .env
     OPENAI_API_KEY: str
+    API_KEY: str = "dev-secret-key"  # Default for development
     REDIS_URL: str = "redis://localhost:6379/0"
     CHROMA_DB_PATH: str = "./data/chromadb"
 

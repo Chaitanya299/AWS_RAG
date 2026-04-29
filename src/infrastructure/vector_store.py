@@ -1,5 +1,5 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 import chromadb
 from typing import List, Optional, Dict
 from src.domain.models import Chunk, Document
@@ -13,14 +13,13 @@ class VectorStoreRepository:
     def __init__(self):
         self.client = chromadb.PersistentClient(path=settings.CHROMA_DB_PATH)
 
-        # Use OpenAI Embeddings for superior semantic understanding
-        self.embeddings = OpenAIEmbeddings(
-            model=settings.EMBEDDING_MODEL,
-            openai_api_key=settings.OPENAI_API_KEY
+        # Use Local HuggingFace Embeddings for extreme speed (no network call)
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name="all-MiniLM-L6-v2"
         )
 
         self.collection = self.client.get_or_create_collection(
-            name="aws_knowledge_v2",  # Updated for AWS context
+            name="aws_knowledge_v3_local",  # New version for local embeddings
             metadata={"hnsw:space": "cosine"}
         )
 
