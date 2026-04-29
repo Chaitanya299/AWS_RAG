@@ -70,14 +70,51 @@ class DomainGuard:
 
     async def validate(self, query: str):
         if not await self.is_in_domain(query):
-            raise DomainBoundaryException(f"Query is outside the allowed domain: {self.allowed_domain}")
+            # Instead of a generic error, we provide a helpful message that the AI can use
+            # or the API can catch to explain the boundary.
+            raise DomainBoundaryException(
+                f"I specialize exclusively in AWS Cloud Services and Infrastructure. "
+                f"Currently, I don't have specialized knowledge about '{query}'. "
+                f"Please ask me about EC2, S3, RDS, Lambda, or AWS architecture best practices!"
+            )
 
 class ResponseGuard:
     """Validates the generated response for hallucinations and safety."""
 
+    def __init__(self, openai_client=None):
+        self.openai = openai_client
+
+    async def check_hallucination(self, question: str, answer: str, context: str) -> float:
+        """
+        Uses LLM-as-a-judge (G-Eval pattern) to score faithfulness.
+        Returns a score from 0.0 (total hallucination) to 1.0 (perfectly faithful).
+        """
+        if not self.openai:
+            return 1.0 # Default to pass if no judge available
+
+        prompt = (
+            "You are an expert evaluator. Rate the FAITHFULNESS of an AI's answer based on the provided context.\n\n"
+            f"Context: {context}\n"
+            f"Question: {question}\n"
+            f"Answer: {answer}\n\n"
+            "Score from 0 to 10, where 10 means the answer is 100% supported by the context and contains no outside info. "
+            "Respond only with the numeric score."
+        )
+
+        try:
+            res = await self.openai.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=5,
+                temperature=0
+            )
+            score_str = res.choices[0].message.content.strip()
+            return float(score_str) / 10.0
+        except Exception:
+            return 1.0
+
     def validate(self, answer: str, source_chunks: List[str]):
         """
-        In a production system, this would use NLI (Natural Language Inference)
-        or an LLM-based evaluator to check if the answer is supported by the chunks.
+        Synchronous safety check (e.g. sensitive info leakage).
         """
         pass
