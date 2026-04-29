@@ -97,6 +97,11 @@ Main endpoint for synchronized RAG retrieval.
 ### POST /api/stream-query
 Streaming endpoint (SSE) for low-latency perceived performance.
 
+**Features:**
+- **Unified Docs**: Interactive Swagger UI is proxied through the frontend development server at `http://localhost:5173/docs`.
+- **API Key Auth**: Secured via X-API-KEY header.
+- **Rate Limiting**: Integrated slowapi to prevent resource exhaustion.
+
 ---
 
 ## Local Development Guide
@@ -135,21 +140,25 @@ Before running the API, you must ingest the AWS documentation into the local Chr
 python scripts/ingest_aws_data.py
 ```
 
-### 4. Running the Backend API
+### 4. Running the Services
+To fully utilize the proxy configuration, run both the backend and frontend:
+
+**Backend:**
 ```bash
-# Start the FastAPI server with hot-reload
 python src/main.py
 ```
-The API will be available at `http://localhost:8000`. You can view the interactive Swagger docs at `http://localhost:8000/docs`.
+*Accessible at `http://localhost:8000`*
 
-### 5. Frontend Installation & Setup
-In a new terminal window:
+**Frontend:**
 ```bash
-cd frontend
-npm install
-npm run dev
+cd frontend && npm run dev
 ```
-The frontend will be available at `http://localhost:5173`.
+*Accessible at `http://localhost:5173`*
+
+### 5. Accessing API Documentation
+The Vite configuration includes a proxy for API routes. You can access the interactive Swagger UI directly through your frontend development server:
+- **Unified Docs**: `http://localhost:5173/docs`
+- **OpenAPI Schema**: `http://localhost:5173/openapi.json`
 
 ### 6. Verification
 To verify the setup, you can run the integrated evaluation script:
