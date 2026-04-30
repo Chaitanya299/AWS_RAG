@@ -1,23 +1,22 @@
-# Architecture Restoration Plan
+# Complete End-to-End Vercel Fix Plan
 
-## Current Broken State
-- Backend Python files (`src/main.py`, `src/application`, `src/infrastructure`, etc.) were accidentally deleted during a `git stash pop`.
-- Frontend React files (`components`, `routes`, `lib`, etc.) were dumped into the root `src/` directory instead of `frontend/src/`.
-- Vercel build fails with `ENOENT` because it expects frontend code in `frontend/src/`.
+## The Root Cause
+1. **Directory Flattening**: The frontend files (`package.json`, `vite.config.ts`, and the React `src/` directory) are currently sitting in the **root** directory of the repository. Vercel's configuration (`vercel.json`) expects them to be in a `frontend/` directory.
+2. **TanStack Router Splitting**: Vercel fails with `ENOENT` during the `tsr-split=component` phase because the imports for files like `settings-store` lack explicit extensions (`.ts`/`.tsx`). In strict ESM environments, extension-less imports fail during virtual file compilation.
 
-## Phase 1: Frontend Realignment
-1. Ensure the `frontend/src/` directory exists.
-2. Move all frontend-specific folders and files from the root `src/` to `frontend/src/`:
-   - `components/`, `hooks/`, `lib/`, `routes/`
-   - `router.tsx`, `routeTree.gen.ts`, `styles.css`
-3. Verify that `frontend/package.json` and `frontend/vite.config.ts` are correctly in place.
+## Execution Steps
 
-## Phase 2: Backend Restoration
-1. Use Git to restore the missing backend files from the last known good commit (`8099dd6` or `d7c51ea`).
-   - Run: `git checkout 8099dd6 -- src/main.py src/application src/domain src/infrastructure src/shared config/`
-2. Apply the final production updates to `src/application/rag_service.py` (e.g., removing Redis, adding `DomainBoundaryException` fallback) that were made *after* that commit.
-3. Ensure the root `requirements.txt` is intact and doesn't contain `redis`.
+### Phase 1: Directory Realignment
+Move all frontend configuration and source files from the root into a dedicated `frontend/` directory.
+1. `mkdir -p frontend/src`
+2. Move the frontend source files: `mv src/components src/hooks src/lib src/routes src/router.tsx src/routeTree.gen.ts src/styles.css frontend/src/`
+3. Move frontend configs: `mv package.json package-lock.json vite.config.ts tsconfig.json components.json eslint.config.js bun.lockb bunfig.toml wrangler.jsonc node_modules frontend/`
 
-## Phase 3: Build Verification
-1. Run `cd frontend && npm run build`.
-2. Ensure Vercel can successfully resolve all imports and emit the production assets without `ENOENT` errors.
+### Phase 2: Explicit Extensions Fix
+Run a script to update all internal imports within `frontend/src/` to include `.ts` or `.tsx` extensions.
+1. Check `frontend/src/routes/index.tsx` and ensure `import { useSettings } from "@/lib/settings-store";` becomes `import { useSettings } from "@/lib/settings-store.ts";`.
+2. Do the same for `api-client.ts`, `session-logs.ts`, `types.ts`, and all `ui` and `dashboard` components.
+
+### Phase 3: Build Verification
+1. Run `cd frontend && npm run build` to verify the Vite build completes with zero errors.
+2. Commit and push the fixes.

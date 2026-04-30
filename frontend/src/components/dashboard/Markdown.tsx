@@ -4,12 +4,12 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Copy, Check, ExternalLink, FileText, Hash } from "lucide-react";
 import { useState } from "react";
-import type { SourceChunk } from "@/lib/types";
+import type { SourceChunk } from "@/lib/types.ts";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card";
+} from "@/components/ui/hover-card.tsx";
 
 interface MarkdownProps {
   content: string;

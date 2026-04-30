@@ -1,13 +1,13 @@
 import { Download, FileJson, FileText } from "lucide-react";
 import jsPDF from "jspdf";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { ChatMessage } from "@/lib/types";
+} from "@/components/ui/dropdown-menu.tsx";
+import type { ChatMessage } from "@/lib/types.ts";
 import { toast } from "sonner";
 
 interface ExportMenuProps {

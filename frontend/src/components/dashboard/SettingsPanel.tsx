@@ -8,7 +8,7 @@ import {
   EyeOff,
   CheckCircle2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.tsx";
 import {
   Sheet,
   SheetContent,
@@ -16,11 +16,11 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useSettings } from "@/lib/settings-store";
+} from "@/components/ui/sheet.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import { Switch } from "@/components/ui/switch.tsx";
+import { useSettings } from "@/lib/settings-store.ts";
 import { toast } from "sonner";
 
 export function SettingsPanel() {

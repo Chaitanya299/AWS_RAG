@@ -1,6 +1,6 @@
 import { Clock, FileText, MessageSquare, Trash2 } from "lucide-react";
 import { useSessionLogs } from "../../lib/session-logs.ts";
-import { Button } from "../ui/button";
+import { Button } from "../ui/button.tsx";
 import {
   Table,
   TableBody,
@@ -8,8 +8,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@/components/ui/table.tsx";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString([], {
