@@ -176,3 +176,5 @@ If the dashboard shows "Operational", you are ready to query! Ask any question, 
 - **Selective Caching**: We intentionally did not include global caching for generated responses due to privacy and security guardrail complexity.
 - **Corpus Recency**: The system is currently limited to the aws-overview.pdf context. 
 - **Context Window**: Large document retrievals can occasionally hit token limits, managed currently via RecursiveCharacterTextSplitter.
+
+*by ~ Chaitanya♥️*
