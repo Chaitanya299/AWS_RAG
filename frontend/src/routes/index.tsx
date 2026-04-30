@@ -28,10 +28,16 @@ function Dashboard() {
   const isConfigured = !!apiKey && !!apiBaseUrl;
 
   const handleAssistantMessage = (m: ChatMessage) => {
+    console.log("Dashboard: handleAssistantMessage received sources:", m.sources);
     setAllMessages((prev) => {
       const exists = prev.some((p) => p.id === m.id);
       return exists ? prev.map((p) => (p.id === m.id ? m : p)) : [...prev, m];
     });
+  };
+
+  const setActiveMessageAndLog = (m: ChatMessage | null) => {
+    console.log("Dashboard: setActiveMessage received message (sources count):", m?.sources?.length);
+    setActiveMessage(m);
   };
 
   const handleCitationClick = (i: number) => {
@@ -89,7 +95,7 @@ function Dashboard() {
               <ChatPanel
                 onAssistantMessage={handleAssistantMessage}
                 onCitationClick={handleCitationClick}
-                onActiveChange={setActiveMessage}
+                onActiveChange={setActiveMessageAndLog}
               />
             </div>
           </div>

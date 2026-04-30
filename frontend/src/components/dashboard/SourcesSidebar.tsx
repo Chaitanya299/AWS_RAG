@@ -12,7 +12,11 @@ interface SourcesSidebarProps {
 }
 
 function ConfidenceGauge({ score }: { score: number }) {
-  const pct = Math.max(0, Math.min(1, score));
+  // Normalize RRF scores: RRF scores are typically small and relative.
+  // We scale them assuming a max practical RRF score of around 0.018
+  // to make them readable for the user (e.g., 0.015 -> ~80% confidence).
+  const scaledScore = Math.min(1, score * 55);
+  const pct = Math.max(0, scaledScore);
   const color = pct > 0.75 ? "#10b981" : pct > 0.5 ? "#FF9900" : "#ef4444";
   const radius = 16;
   const circumference = 2 * Math.PI * radius;
@@ -219,7 +223,7 @@ export function SourcesSidebar({ sources, selectedIndex, onSelect }: SourcesSide
     <div className="space-y-2">
       {sources.map((s, i) => (
         <SourceCard
-          key={i}
+          key={`${s.metadata.doc_id || 'doc'}-${s.metadata.chunk_index || i}`}
           source={s}
           index={i}
           expanded={expanded.has(i) || selectedIndex === i}

@@ -97,11 +97,26 @@ class RAGService:
 
     async def stream_query(self, query_text: str) -> AsyncGenerator[str, None]:
         """
-        Executes RAG pipeline and returns an async generator for streaming the answer.
+        Executes RAG pipeline and returns an async generator that yields
+        Server-Sent Events (SSE) with structured JSON payloads.
+
+        Event types emitted:
+          { "type": "step",    "step": "..." }
+          { "type": "sources", "sources": [ {content, metadata, score}, ... ] }
+          { "type": "token",   "content": "..." }
+          { "type": "latency", "latency_ms": <float> }
+          { "type": "done" }
         """
+        start_time = time.perf_counter()
+
+        def _sse(data: dict) -> str:
+            return f"data: {json.dumps(data)}\n\n"
+
         # 1. Validation & Parallel Retrieval
+        yield _sse({"type": "step", "step": "Validating query…"})
         self.prompt_guard.validate(query_text)
 
+        yield _sse({"type": "step", "step": "Retrieving context…"})
         domain_task = asyncio.create_task(self.domain_guard.validate(query_text))
         retrieval_task = asyncio.create_task(asyncio.to_thread(self.vector_store.search, query_text, top_k=10))
 
@@ -109,14 +124,30 @@ class RAGService:
             await asyncio.gather(domain_task, retrieval_task)
         except DomainBoundaryException as e:
             # Graceful domain boundary handling for streaming
-            yield str(e)
+            yield _sse({"type": "token", "content": str(e)})
+            yield _sse({"type": "done"})
             return
 
         source_chunks = retrieval_task.result()
+
+        # 2. Emit sources so the frontend can render citations
+        yield _sse({
+            "type": "sources",
+            "sources": [
+                {
+                    "content": c.content,
+                    "metadata": c.metadata,
+                    "score": c.score if c.score is not None else 0.0,
+                }
+                for c in source_chunks
+            ],
+        })
+
         context = "\n\n".join([c.content for c in source_chunks])
         prompt = self._build_prompt(query_text, context)
 
-        # 2. Streaming Generation
+        # 3. Streaming Generation
+        yield _sse({"type": "step", "step": "Generating answer…"})
         system_msg = (
             f"You are a helpful assistant specialized in {settings.DOMAIN_NAME}. "
             f"You will be provided with documents in <context> tags and a user question in <user_query> tags. "
@@ -138,9 +169,14 @@ class RAGService:
             )
             async for chunk in stream:
                 if chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+                    yield _sse({"type": "token", "content": chunk.choices[0].delta.content})
         except Exception as e:
-            yield f"Error during generation: {str(e)}"
+            yield _sse({"type": "token", "content": f"Error during generation: {str(e)}"})
+
+        # 4. Emit latency and completion signal
+        latency_ms = (time.perf_counter() - start_time) * 1000
+        yield _sse({"type": "latency", "latency_ms": round(latency_ms, 1)})
+        yield _sse({"type": "done"})
 
     def _build_prompt(self, query: str, context: str) -> str:
         return (

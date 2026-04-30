@@ -89,7 +89,7 @@ export function ChatBubble({ message, onCitationClick }: ChatBubbleProps) {
                     <span className="text-[10px] font-bold font-mono text-primary">{i + 1}</span>
                     <div className="h-2 w-[1px] bg-primary/20" />
                     <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-medium">
-                      {Math.round(s.score * 100)}%
+                      {Math.round(Math.min(1, s.score * 55) * 100)}%
                     </span>
                   </button>
                 </HoverCardTrigger>

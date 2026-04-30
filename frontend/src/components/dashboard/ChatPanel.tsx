@@ -43,8 +43,12 @@ export function ChatPanel({ onAssistantMessage, onCitationClick, onActiveChange 
   useEffect(() => {
     const lastAssistant = [...messages]
       .reverse()
-      .find((m) => m.role === "assistant" && !m.streaming);
-    onActiveChange(lastAssistant ?? null);
+      .find((m) => m.role === "assistant");
+
+    if (lastAssistant) {
+      console.log("ChatPanel: Triggering onActiveChange, sources:", lastAssistant.sources?.length);
+      onActiveChange(lastAssistant);
+    }
   }, [messages, onActiveChange]);
 
   useEffect(() => {
