@@ -1,15 +1,19 @@
 import time
-from fastapi import FastAPI, HTTPException, Request, Depends, Security
-from fastapi.security.api_key import APIKeyHeader
-from pydantic import BaseModel
+import os
 from typing import List, Optional
-from src.application.rag_service import RAGService
-from src.domain.exceptions import SafetyException, DomainBoundaryException
-from config.settings import settings
-
+from fastapi import FastAPI, HTTPException, Request, Depends, Security
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security.api_key import APIKeyHeader
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from starlette.requests import Request as StarletteRequest
+
+from src.application.rag_service import RAGService
+from src.domain.exceptions import SafetyException, DomainBoundaryException
+from config.settings import settings
 
 # Initialize Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -17,9 +21,15 @@ app = FastAPI(title="AWS Assistant RAG API")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Import Request from starlette explicitly to ensure type match for slowapi
-from fastapi.responses import StreamingResponse
-from starlette.requests import Request as StarletteRequest
+# Enable CORS for frontend integration
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 API_KEY_NAME = "X-API-KEY"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
@@ -55,7 +65,7 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
-@app.post("/query", response_model=QueryResponse)
+@app.post("/api/query", response_model=QueryResponse)
 @limiter.limit("5/minute")
 async def query_endpoint(
     request: Request,
@@ -89,7 +99,7 @@ async def query_endpoint(
         # Production would log the full stack trace
         raise HTTPException(status_code=500, detail="Internal processing error.")
 
-@app.post("/stream-query")
+@app.post("/api/stream-query")
 @limiter.limit("5/minute")
 async def stream_query_endpoint(
     request: Request,
@@ -105,6 +115,14 @@ async def stream_query_endpoint(
         media_type="text/event-stream"
     )
 
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "domain": settings.DOMAIN_NAME}
+
+@app.get("/")
+async def root():
+    return {
+        "message": "AWS Assistant RAG API is running.",
+        "api_docs": "/docs",
+        "health": "/api/health"
+    }

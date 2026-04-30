@@ -1,4 +1,3 @@
-<!-- /autoplan restore point: /Users/parasana/.gstack/projects/domain_specific_RAG/main-repair-restore-20260430-012241.md -->
 # AWS Assistant — High-Performance Enterprise RAG
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
@@ -98,11 +97,6 @@ Main endpoint for synchronized RAG retrieval.
 ### POST /api/stream-query
 Streaming endpoint (SSE) for low-latency perceived performance.
 
-**Features:**
-- **Unified Docs**: Interactive Swagger UI is proxied through the frontend development server at `http://localhost:5173/docs`.
-- **API Key Auth**: Secured via X-API-KEY header.
-- **Rate Limiting**: Integrated slowapi to prevent resource exhaustion.
-
 ---
 
 ## Local Development Guide
@@ -142,27 +136,6 @@ uvicorn src.main:app --host 0.0.0.0 --port 3000
 ```
 The API is now running at `http://localhost:3000`. You can test it via `http://localhost:3000/docs`.
 
-<<<<<<< HEAD
-### 4. Running the Services
-To fully utilize the proxy configuration, run both the backend and frontend:
-
-**Backend:**
-```bash
-python src/main.py
-```
-*Accessible at `http://localhost:8000`*
-
-**Frontend:**
-```bash
-cd frontend && npm run dev
-```
-*Accessible at `http://localhost:5173`*
-
-### 5. Accessing API Documentation
-The Vite configuration includes a proxy for API routes. You can access the interactive Swagger UI directly through your frontend development server:
-- **Unified Docs**: `http://localhost:5173/docs`
-- **OpenAPI Schema**: `http://localhost:5173/openapi.json`
-=======
 ### 3. Frontend Setup
 In a new terminal window, from the project root:
 
@@ -176,13 +149,12 @@ npm install
 # 3. Start the development server
 npm run dev
 ```
->>>>>>> 11aa351 (feat: final changes, locally first environment)
 
 **4. Configure the Dashboard**
 - Open `http://localhost:5173` in your browser.
 - Open **Settings** (top-right).
 - **API Base URL**: `http://localhost:3000`
-- **X-API-KEY**: `Rfvtgb*321`
+- **X-API-KEY**: Ask the author 
 - Click **Save**. The "System Health" indicator should turn green ("Operational").
 
 ### 4. Verification
@@ -204,9 +176,3 @@ If the dashboard shows "Operational", you are ready to query! Ask any question, 
 - **Selective Caching**: We intentionally did not include global caching for generated responses due to privacy and security guardrail complexity.
 - **Corpus Recency**: The system is currently limited to the aws-overview.pdf context. 
 - **Context Window**: Large document retrievals can occasionally hit token limits, managed currently via RecursiveCharacterTextSplitter.
-
-<<<<<<< HEAD
----
-=======
->>>>>>> 11aa351 (feat: final changes, locally first environment)
-*by~Chaitanya ♥️*
