@@ -52,13 +52,17 @@ We implement a Reciprocal Rank Fusion (RRF) strategy to solve the limitations of
 
 ### 2. Multi-Model Routing & Fallback
 To balance cost and reliability, we use a tiered execution model:
-- **Tier 1 (Classification)**: gpt-4o-mini handles domain gating and safety checks.
-- **Tier 2 (Primary Generation)**: gpt-4o handles the complex synthesis of technical AWS answers.
-- **Fallback**: If the primary model encounters rate limits or errors, the system automatically falls back to a secondary stable instance to ensure 99.9% availability.
+- **Tier 1 (Classification)**: `gpt-4o-mini` handles domain gating and safety checks.
+- **Tier 2 (Primary Generation)**: `gpt-4o` handles the complex synthesis of technical AWS answers.
+- **Resilience**: The system implements automated multi-model fallback (GPT-4o → 4o-mini). If the primary model encounters rate limits or errors, the system automatically falls back to a secondary stable instance to ensure 99.9% availability.
 
-### 3. Parallel Async Pipeline
-- **Implementation**: We use asyncio.gather to run Domain Guard validation and Vector Retrieval concurrently.
-- **Reasoning**: Since retrieval is I/O bound and domain validation is network-latency bound, parallelizing these saves ~1.5 seconds per request without increasing compute cost.
+### 3. Parallel Async Pipeline & Elite RAG Engine
+- **Elite RAG Engine**: The backend is upgraded to an Elite RAG Engine featuring parallel hybrid retrieval (Dense + BM25) and Reciprocal Rank Fusion (RRF).
+- **Implementation**: We use `asyncio.gather` to run Domain Guard validation and Vector Retrieval concurrently.
+- **Reasoning**: Since retrieval is I/O bound and domain validation is network-latency bound, parallelizing these saves ~1.5 seconds per request.
+
+### 4. Hallucination Detection (G-Eval)
+- **Faithfulness (G-Eval)**: We use an "LLM-as-a-judge" pattern (`ResponseGuard`) to score how well the answer is supported by the retrieved context (0.0 - 1.0).
 
 ---
 
@@ -67,31 +71,27 @@ To balance cost and reliability, we use a tiered execution model:
 Our security layer is designed to be proactive rather than reactive, handling three primary threat vectors:
 
 ### ● Prompt Injection & Jailbreaks
-- **Regex-based Anchoring**: We use strict pattern matching to detect common jailbreak precursors ("ignore previous instructions", "system prompt").
-- **XML Tag Isolation**: User input is wrapped in <user_query> tags. Our system rejects any query containing closing tags (</user_query>), preventing "tag spoofing" where a user tries to escape the prompt context.
+- **Regex-based Anchoring**: We use strict pattern matching to detect common jailbreak precursors (e.g., "ignore previous instructions", "jailbreak").
+- **Encoded Attack Handling**: The system proactively blocks common encoded attack patterns (e.g., Base64/Hex attempts).
+- **XML Tag Isolation**: User input is wrapped in `<user_query>` tags. Our system rejects any query containing closing tags (`</user_query>`), preventing "tag spoofing" where a user tries to escape the prompt context.
 
 ### ● Domain Boundary Enforcement (Domain Guard)
-- We use an LLM-based classifier to verify if the query relates to AWS. 
-- **Trade-off**: This adds latency but prevents the system from being used as a general-purpose LLM, significantly reducing cost leakage and unintended usage.
-
-### ● Encoded Attacks
-- The system includes checks for Base64 and hexadecimal encoding attempts often used to bypass basic filters. The input guard identifies these patterns and blocks them before they reach the reasoning engine.
+- We use an LLM-based classifier to verify if the query relates to AWS and provide helpful AWS-branded explanations if the user asks out-of-scope questions.
 
 ### ● Layered Authentication (X-API-KEY)
-- **Implementation**: We require a mandatory X-API-KEY header for all endpoints.
-- **Reasoning**: We added this second layer of authentication to decouple API access from identity providers. This ensures that even if a frontend session is compromised, the backend remains protected by a rotating, infrastructure-level secret that is never exposed in client-side storage.
+- **Implementation**: We require a mandatory `X-API-KEY` header for all endpoints to protect the backend.
 
 ---
 
 ## API Layer
 
-The system is exposed via a production-grade FastAPI layer with integrated rate limiting and authentication.
+The system is exposed via a production-grade FastAPI layer.
 
 ### POST /api/query
 Main endpoint for synchronized RAG retrieval.
 ```json
 {
-  "question": "How do I configure S3 bucket policies for cross-account access?"
+  "question": "How do I optimize costs for a high-traffic RDS instance?"
 }
 ```
 
@@ -107,40 +107,42 @@ Streaming endpoint (SSE) for low-latency perceived performance.
 
 ## Local Development Guide
 
+Follow these steps for a clean, reliable local setup.
+
 ### 1. Prerequisites
 - **Python 3.12+**
 - **Node.js 20+**
-- **Redis Server** (Optional for local dev, but required for caching features)
 
-### 2. Backend Installation & Setup
-From the root directory:
+### 2. Backend Setup
+From the project root:
+
 ```bash
-# Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+# 1. Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install dependencies
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# Configure Environment Variables
-# Create a .env file in the root directory:
-touch .env
+# 3. Set up environment variables
+# Copy the example file and update it with your API key
+cp .env.example .env
 ```
+
 **Required `.env` content:**
 ```env
-OPENAI_API_KEY=your_key_here
-API_KEY=dev-secret-key
+OPENAI_API_KEY=your_openai_api_key_here
+API_KEY=Rfvtgb*321
 DOMAIN_NAME=AWS Cloud Services
-REDIS_URL=redis://localhost:6379
 ```
 
-### 3. Knowledge Base Ingestion
-Before running the API, you must ingest the AWS documentation into the local ChromaDB instance:
+**4. Start the Backend API**
 ```bash
-# This will process the aws-overview.pdf and create the vector index
-python scripts/ingest_aws_data.py
+uvicorn src.main:app --host 0.0.0.0 --port 3000
 ```
+The API is now running at `http://localhost:3000`. You can test it via `http://localhost:3000/docs`.
 
+<<<<<<< HEAD
 ### 4. Running the Services
 To fully utilize the proxy configuration, run both the backend and frontend:
 
@@ -160,12 +162,31 @@ cd frontend && npm run dev
 The Vite configuration includes a proxy for API routes. You can access the interactive Swagger UI directly through your frontend development server:
 - **Unified Docs**: `http://localhost:5173/docs`
 - **OpenAPI Schema**: `http://localhost:5173/openapi.json`
+=======
+### 3. Frontend Setup
+In a new terminal window, from the project root:
 
-### 6. Verification
-To verify the setup, you can run the integrated evaluation script:
 ```bash
-python scripts/eval_rag.py
+# 1. Navigate to frontend
+cd frontend
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the development server
+npm run dev
 ```
+>>>>>>> 11aa351 (feat: final changes, locally first environment)
+
+**4. Configure the Dashboard**
+- Open `http://localhost:5173` in your browser.
+- Open **Settings** (top-right).
+- **API Base URL**: `http://localhost:3000`
+- **X-API-KEY**: `Rfvtgb*321`
+- Click **Save**. The "System Health" indicator should turn green ("Operational").
+
+### 4. Verification
+If the dashboard shows "Operational", you are ready to query! Ask any question, and the assistant will retrieve context from the AWS documentation.
 
 ---
 
@@ -184,5 +205,8 @@ python scripts/eval_rag.py
 - **Corpus Recency**: The system is currently limited to the aws-overview.pdf context. 
 - **Context Window**: Large document retrievals can occasionally hit token limits, managed currently via RecursiveCharacterTextSplitter.
 
+<<<<<<< HEAD
 ---
+=======
+>>>>>>> 11aa351 (feat: final changes, locally first environment)
 *by~Chaitanya ♥️*
