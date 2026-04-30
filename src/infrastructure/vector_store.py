@@ -116,19 +116,10 @@ class VectorStoreRepository:
         # Sort by RRF score
         sorted_results = sorted(rrf_scores.items(), key=lambda item: item[1], reverse=True)[:top_k]
 
-        if not sorted_results:
-            return []
-
-        # Min-Max Normalization for human-readable confidence scores (0.0 to 1.0 range)
-        # RRF scores are naturally very small (1/61, 1/62...), so we scale them relative to the top result.
-        max_score = sorted_results[0][1]
-        min_score = sorted_results[-1][1] if len(sorted_results) > 1 else 0
-        score_range = max_score - min_score if max_score > min_score else max_score
-
         return [
             Chunk(
                 content=content,
                 metadata=content_to_meta[content],
-                score=(score - min_score) / score_range if score_range > 0 else 1.0
+                score=score
             ) for content, score in sorted_results
         ]
